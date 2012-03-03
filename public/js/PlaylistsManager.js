@@ -139,14 +139,30 @@
 
 			// The DOM events specific to an item.
 		    events: {
-		      "click .edit" : "edit"
+		      "click .edit" : "edit",
+		      "click .delete" : "deletePlaylist"
 		     },
 
 			initialize: function() {
+
 				this.input = this.$('.edit input');
 				this.model.bind('change', this.render, this);
+				this.model.bind('destroy', this.remove, this);
+				
 			},
 
+			deletePlaylist: function (eEvent) {
+
+				var sTitle = this.model.get("title");
+				var bConfirmed = confirm("Are you sure you want to delete playlist " + sTitle);
+
+				if (bConfirmed) {
+					this.model.destroy();
+				}
+
+				eEvent.preventDefault();
+			},
+			
 			edit: function (eEvent) {
 
 				var view = new PlaylistEditView({ model: this.model });
