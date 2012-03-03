@@ -1,0 +1,113 @@
+<!doctype html>
+
+<!--[if lt IE 7]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+
+    <title>PlayList Manager for SoundCloud</title>
+    <meta name="author" content="JuanMa Garrido <juanma.garrido@gmail.com>">
+
+    <link href="http://importer.soundcloudlabs.com/stylesheets/labs.css" media="screen" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="css/main.css" media="screen, projection">
+
+    <script src="js/libs/modernizr-1.6.min.js"></script>
+
+    <script src="js/libs/jquery-1.7.1.js"></script>
+    <script src="js/libs/underscore-1.3.1.js"></script>
+    <script src="js/libs/backbone-0.9.1.js"></script>
+    <script src="js/libs/backbone-localStorage.js"></script>
+
+    <script src="js/PlaylistsManager.js"></script>
+
+    <style>
+
+      div.playlist-container  { margin:50px 0; }
+        div.playlist-container .title, div.playlist-container fieldset { position:relative; padding:0px 20px; border:1px solid #ccc; }
+        div.playlist-container .actions { position:absolute; right:10px; bottom:0px; list-style-type: none; }
+        div.playlist-container .actions li { margin-left:10px; display: inline; }
+
+        div.playlist-container fieldset { padding:20px;}
+        div.playlist-container fieldset dl { margin:0; padding:0; }
+        div.playlist-container fieldset dl dd { margin:0 0 10px; padding:0; }
+
+       
+    </style>
+
+    <!-- #playlist-list-item-template --> 
+
+    <script type="text/template" id="playlist-list-item-template">
+      <div class="title">
+        <h2><%= title %></h2>
+        <p><%= description %></p>
+
+        <ul class="actions">
+          <li><a class="edit" href="#">Edit</a></li>
+          <li><a class="delete" href="#">Delete</a></li>
+        </ul>  
+      </div>
+
+      <ol class="tracks">
+        <% _.each(tracks, function(track) { %>
+          <li><strong><%= track.title %></strong> <em><%= track.user %></em></li>
+        <% }); %>
+      </ol>
+
+      <p><a href="#">Add a Song</a></p>
+    </script>
+
+    <!-- #playlist-edit-template--> 
+
+    <script type="text/template" id="playlist-edit-template">
+      <dl>
+          <dt><label><strong>Title</strong> of the Playlist</label></dt>
+          <dd><input name="title" size="60" value="<%= title %>" /></dd>
+
+          <dt><label><strong>Description</strong> of the Playlist</label></dt>
+          <dd><textarea name="description" cols="43" rows="4"><%= description %></textarea></dd>
+      </dl>
+
+      <a href="#" class="button save">Save</a>
+      <a href="#" class="cancel">Cancel</a>
+
+    </script>
+
+    <!-- #playlist-new-template--> 
+
+    <script type="text/template" id="playlist-new-template">
+      <a href="#" id="create_playlist" class="big button">Create a Playlist</a>
+    </script>
+
+  </head>
+
+  <body>
+
+    <div id="page">
+
+      <div id="header">
+        <h1>SoundCloud PlayList Manager</h1>
+      </div>
+
+      <div id="container">
+        
+
+        <p>The <strong>SoundCloud PlayList Manager</strong> allows you to <em>create playlists of ANY tracks on SoundCloud</em>:</p>
+
+        <ul>
+          <li>A user can edit and delete the playlists.</li>
+          <li>A user can play all the tracks in the playlist with one click or tap.</li>
+          <li>A user can give a playlist a title and description.</li>
+        </ul>
+
+        <div id="list_playlists"></div>
+        <div id="new_playlist"></div>
+
+      </div>
+
+    </div>
+
+  </body>
+</html>
