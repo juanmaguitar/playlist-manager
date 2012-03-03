@@ -81,43 +81,6 @@
       <a href="#" id="create_playlist" class="big button">Create a Playlist</a>
     </script>
 
-<!--
-    <script type="text/template" id="library-template">
-      <h1>Music Library</h1>
-      <ul class="albums"></ul>
-    </script>
-
-    <script type="text/template" id="album-template">
-      <button class="queue add"><img src="/images/add.png" /></button>
-      <button class="queue remove"><img src="/images/remove.png" /></button>
-      <span class="album-title"><%= title %></span>
-      <span class="artist-name"><%= artist %></span>
-      <ol class="tracks">
-        <% _.each(tracks, function(track) { %>
-          <li><%= track.title %></li>
-        <% }); %>
-      </ol>
-    </script>
-
-    <script type="text/template" id="playlist-template">
-      <h1>Playlist</h1>
-      <nav>
-        <button class="control play">Play</button>
-        <button class="control pause">Pause</button>
-        <button class="control prev">Prev</button>
-        <button class="control next">Next</button>
-      </nav>
-      <ul class="albums">
-      </ul>
-    </script>
-
-    <script type="application/javascript">
-      jQuery(function(){
-          window.library.fetch();
-      });
-    </script>
--->
-
   </head>
 
   <body>
@@ -139,22 +102,6 @@
           <li>A user can give a playlist a title and description.</li>
         </ul>
 
-        <!--
-          Bonuses
-          Bonus points if a user can easily undo the last 100 actions.
-          Bonus points if it works on latest Opera/Opera Mobile.
-          Bonus points for a bookmarklet that helps you add the tracks to the
-          playlist from SoundCloud pages.
-
-          Requirements
-          You shouldn't spend more than 2-3 evenings on this task.
-          The web app can be fully client-based or have some minimal back-end/db.
-          The code should be well documented.
-          The code should be available on GitHub.
-          The code should be hosted somewhere accessible to us (e.g.
-          Heroku/Dropbox/Joyent/AWS).*
-        -->
-          
         <div id="list_playlists"></div>
         <div id="new_playlist"></div>
 
