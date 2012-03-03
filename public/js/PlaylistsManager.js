@@ -1,5 +1,10 @@
 (function($) {
 
+
+	SC.initialize({
+    	client_id: "2c73737268dcb58ba837ab14ea99a31b"
+    });
+
     // Models & Collections
 	// --------------------
 
@@ -8,7 +13,6 @@
 	window.Playlist = Backbone.Model.extend({
  		defaults: function() {
       		return {
-      			//id: playlists.nextId(),
       			title: '',
       			description: '',
       			tracks: []
@@ -46,7 +50,6 @@
 		     },
 
 			save: function (eEvent) {
-
 
 				var oData = {
 					title: this.$("input[name='title']").val(),
@@ -131,6 +134,109 @@
 		
 		});
 
+
+		// View of a Playlist
+		window.SongDetailsView = Backbone.View.extend ({
+
+			className: 'details_song',
+			template: _.template( $('#pl_songDetails_tpl').html() ),
+			render: function() {
+
+				var oDetailsSong = this.options.data;
+				$(this.el).html( this.template( oDetailsSong ) );
+				return this;	
+			}
+		
+		});
+
+		// View of a Playlist
+		window.SongNewView = Backbone.View.extend ({
+
+			className: "add_track",
+			template: _.template( $('#pl_newTrack_tpl').html() ),
+			
+			// The DOM events specific to an item.
+		    events: {
+		      "click .details a" : "getDetailsSong",
+		      "click .add a" : "addSong",
+		      "click a.see_form" : "show"
+		     },
+
+		    initialize: function() {
+		     	this.render();
+		    },
+
+		    show: function(eEvent) {
+		    	$(this.el).toggleClass("adding");
+		    	eEvent.preventDefault();
+		    },
+
+			getDetailsSong: function(eEvent) {
+
+				var sUrlSong = this.$('input').val();
+				var aParts = sUrlSong.split("/");
+
+				var sUser = aParts[aParts.length-2]
+				var sIdSong = aParts[aParts.length-1]
+				var self = this;
+
+				console.log ("vamos a añadir: " + sIdSong + " de " + sUser + " to " + this.model.get("title"));
+				eEvent.preventDefault();
+
+				if (sUser && sIdSong ) {
+
+	        		SC.get("/users/"+sUser+"/tracks.json", function( oTracks ){
+
+	        			var oTrackFound = null;
+
+	        			$.each(oTracks, function(index, track) {
+	        				if ( track.permalink === sIdSong ) {
+	        					oTrackFound = track;
+	        				}
+	        			})
+	        			
+	        			if (oTrackFound) {
+			        		var viewSongDetails = new SongDetailsView({ data: oTrackFound });
+				        	self.$('p.details').hide();
+							self.$('p.add').show().before( viewSongDetails.render().el );
+							self.songDetails = oTrackFound;
+						}
+						else {
+							console.log ("we found nothing");
+						}
+						
+					});
+				}
+				else {
+					console.log ("we found nothing");
+				}           
+				
+			},
+
+			addSong: function() {
+
+				var aTracks = this.model.get("tracks");
+				var oTrack = {
+					title: this.songDetails.title,
+					user: this.songDetails.user.username,
+					url: this.songDetails.permalink_url
+				};
+				aTracks.push(oTrack);
+
+				this.model.set("tracks",aTracks);
+				this.model.save();
+				this.model.trigger("change");
+				
+
+			},
+
+			render: function() {
+				$(this.el).html( this.template( this.model.toJSON() ) );
+				return this;	
+			}
+		
+		});
+
 		// View of a Playlist
 		window.PlaylistView = Backbone.View.extend ({
 
@@ -141,6 +247,7 @@
 		    events: {
 		      "click .edit" : "edit",
 		      "click .delete" : "deletePlaylist"
+
 		     },
 
 			initialize: function() {
@@ -172,8 +279,18 @@
 			},
 			
 			render: function() {
+				console.log ("algo ha cambiado en el modelo");
 				var renderedContent = this.template( this.model.toJSON() );
+
+				// TO-DO.: check a better place for this
+				var viewSongNew = new SongNewView({
+					model: this.model
+				});
+
 				$(this.el).html(renderedContent);
+				$(this.el).append( viewSongNew.render().el );
+
+
 				return this;	
 			}
 		

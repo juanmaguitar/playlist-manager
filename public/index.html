@@ -16,17 +16,21 @@
 
     <script src="js/libs/modernizr-1.6.min.js"></script>
 
+    <script src="js/libs/json2.js"></script>
     <script src="js/libs/jquery-1.7.1.js"></script>
     <script src="js/libs/underscore-1.3.1.js"></script>
     <script src="js/libs/backbone-0.9.1.js"></script>
     <script src="js/libs/backbone-localStorage.js"></script>
+    <script type="text/javascript" src="http://connect.soundcloud.com/2/latest.min.js"></script>
 
     <script src="js/PlaylistsManager.js"></script>
 
     <style>
 
+      .hidden { display:none; }
       div.pl_container  { margin:50px 0; }
         div.pl_container .title, fieldset.edit_playlist { position:relative; padding:0px 20px; border:1px solid #ccc; }
+        div.pl_container .title h2 { color: #06C; font-size: 28px; } 
         div.pl_container .actions { position:absolute; right:10px; bottom:0px; list-style-type: none; }
         div.pl_container .actions li { margin-left:10px; display: inline; }
 
@@ -34,7 +38,22 @@
           fieldset.edit_playlist dl { margin:0; padding:0; }
           fieldset.edit_playlist dl dd { margin:0 0 10px; padding:0; }
 
-       
+        div.add_track a.see_form { margin:0 0 5px 15px; }
+        div.add_track a.see_form:after { content: ' '; height: 0; position: absolute; width: 0; border: 5px solid transparent; border-top-color: #06C; margin:5px;}
+        div.add_track div.add_track_container { display:none; }
+
+        div.add_track.adding a.see_form:after { border-top: none; border-bottom-color: #06C; }
+        div.add_track.adding div.add_track_container { display:block; }
+
+        div.add_track_container { border:0; padding:20px 20px 40px; background:#F0F6FB; }
+        div.add_track_container p.details { margin:10px 0; }
+
+        div.details_song { margin:10px 0; }
+        div.details_song p { margin:0; }
+        div.details_song dl { background:#FFF; overflow: hidden; padding:10px; width:300px; }
+        div.details_song dl dt { clear: left; float: left; width: 30px; }
+        div.details_song dl dd { float: left; width: 200px; font-weight:bold; font-style:italic;}
+
     </style>
 
     <!-- #playlist-list-item-template --> 
@@ -56,7 +75,6 @@
         <% }); %>
       </ol>
 
-      <p><a href="#">Add a Song</a></p>
     </script>
 
     <!-- #playlist-edit-template--> 
@@ -79,6 +97,39 @@
 
     <script type="text/template" id="pl_new_tpl">
       <a href="#" id="create_playlist" class="big button">Create a Playlist</a>
+    </script>
+
+    <!-- #playlist-new-song--> 
+
+    <script type="text/template" id="pl_newTrack_tpl">
+      
+        <a href="#" class="see_form">Add Track</a>
+      
+        <div class="add_track_container">
+          <p>Please, insert the <strong>URL of the track</strong> <em>to check it in SoundCloud before adding it to playlist <%= title %></em></p>
+          <input name="url" size="60" /> 
+          <p class="details"><a href="#" class="button">Get Details from SoundCloud</a></p>
+          <div class="player_song"></div>
+          <p class="add hidden"><a href="#" class="button">Add this track</a></p>
+        </div> 
+
+    </script>
+
+
+    <!-- #playlist-new-song--> 
+
+    <script type="text/template" id="pl_songDetails_tpl">
+        <p>It Exists!!! ;-)</p>
+        <p>These are the details of your track...</p>      
+        <dl>
+          <dt>ID:</dt>
+          <dd><%= id %></dd>
+          <dt>Title:</dt>
+          <dd><%= title %></dd>
+          <dt>User:</dt>
+          <dd><%= user.username %></dd>
+        </dl>
+
     </script>
 
   </head>
