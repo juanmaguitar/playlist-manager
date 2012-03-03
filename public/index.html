@@ -25,21 +25,21 @@
 
     <style>
 
-      div.playlist-container  { margin:50px 0; }
-        div.playlist-container .title, div.playlist-container fieldset { position:relative; padding:0px 20px; border:1px solid #ccc; }
-        div.playlist-container .actions { position:absolute; right:10px; bottom:0px; list-style-type: none; }
-        div.playlist-container .actions li { margin-left:10px; display: inline; }
+      div.pl_container  { margin:50px 0; }
+        div.pl_container .title, fieldset.edit_playlist { position:relative; padding:0px 20px; border:1px solid #ccc; }
+        div.pl_container .actions { position:absolute; right:10px; bottom:0px; list-style-type: none; }
+        div.pl_container .actions li { margin-left:10px; display: inline; }
 
-        div.playlist-container fieldset { padding:20px;}
-        div.playlist-container fieldset dl { margin:0; padding:0; }
-        div.playlist-container fieldset dl dd { margin:0 0 10px; padding:0; }
+        fieldset.edit_playlist { padding:20px;}
+          fieldset.edit_playlist dl { margin:0; padding:0; }
+          fieldset.edit_playlist dl dd { margin:0 0 10px; padding:0; }
 
        
     </style>
 
     <!-- #playlist-list-item-template --> 
 
-    <script type="text/template" id="playlist-list-item-template">
+    <script type="text/template" id="pl_listItem_tpl">
       <div class="title">
         <h2><%= title %></h2>
         <p><%= description %></p>
@@ -61,7 +61,7 @@
 
     <!-- #playlist-edit-template--> 
 
-    <script type="text/template" id="playlist-edit-template">
+    <script type="text/template" id="pl_edit_tpl">
       <dl>
           <dt><label><strong>Title</strong> of the Playlist</label></dt>
           <dd><input name="title" size="60" value="<%= title %>" /></dd>
@@ -77,7 +77,7 @@
 
     <!-- #playlist-new-template--> 
 
-    <script type="text/template" id="playlist-new-template">
+    <script type="text/template" id="pl_new_tpl">
       <a href="#" id="create_playlist" class="big button">Create a Playlist</a>
     </script>
 

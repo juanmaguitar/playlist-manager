@@ -36,7 +36,8 @@
 		window.PlaylistEditView = Backbone.View.extend ({
 
 			tagName: 'fieldset',
-			template: _.template( $('#playlist-edit-template').html() ),
+			className: 'edit_playlist',
+			template: _.template( $('#pl_edit_tpl').html() ),
 
 			// The DOM events specific to an item.
 		    events: {
@@ -46,31 +47,27 @@
 
 			save: function (eEvent) {
 
-				var sTitle = this.$("input[name='title']").val();
-				var sDesc = this.$("textarea[name='description']").val();
+
+				var oData = {
+					title: this.$("input[name='title']").val(),
+					description: this.$("textarea[name='description']").val()
+				};
 				var bIsNew = this.model.isNew();
 				
-				
 				if (!bIsNew) {
-	      			this.model.save({ 
-	      				title: sTitle,
-	      				description: sDesc
-	      			});
+	      			this.model.save(oData);
 	      		}
 	      		else {
-	      			this.collection.create({ 
-	      				title: sTitle,
-	      				description: sDesc
-	      			});	
+	      			this.collection.create(oData);	
+	      			this.close();
 	      		}
-      			this.close();
+      			
       			eEvent.preventDefault();
 			},
 
 			close: function () {
-				var view = new PlaylistNewView({
-					collection: this.collection
-				});
+				
+  				this.options.viewNew.render();
 			},
 
 			cancel: function (eEvent) {
@@ -99,7 +96,7 @@
 		window.PlaylistNewView = Backbone.View.extend ({
 
 			el: $("#new_playlist"),
-			template: _.template( $('#playlist-new-template').html() ),
+			template: _.template( $('#pl_new_tpl').html() ),
 			
 			// The DOM events specific to an item.
 		    events: {
@@ -114,7 +111,8 @@
 
 				var view = new PlaylistEditView({ 
 					model: new Playlist(),
-					collection: this.collection
+					collection: this.collection,
+					viewNew : this,
 				});
 
 				$(this.el).html( view.render().el );
@@ -136,8 +134,8 @@
 		// View of a Playlist
 		window.PlaylistView = Backbone.View.extend ({
 
-			className: 'playlist-container',
-			template: _.template( $('#playlist-list-item-template').html() ),
+			className: 'pl_container',
+			template: _.template( $('#pl_listItem_tpl').html() ),
 
 			// The DOM events specific to an item.
 		    events: {
