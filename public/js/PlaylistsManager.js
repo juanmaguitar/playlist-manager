@@ -22,13 +22,69 @@
       		};
     	},
 
-    	playSoundObject: function(sIdTrack) {
+    	playList: function() {
 
-    		
+			var aTracks = this.get("tracks");
+			var nNumTracks = aTracks.length;
+
+			if (nNumTracks) {
+	    		this.listIndexPlaying = 0;
+	    		this.listNumTracks  = nNumTracks;
+
+				this.playSongList(this.listIndexPlaying);
+			}
+			else {
+				return false;
+			}
+
+    	},
+
+		removeTrack : function( nIndex ) {
+	
+			var aTracks = this.get("tracks");
+
+			if (aTracks[nIndex].playing) {
+				window.soundObj.stop();
+			}
+
+			aTracks.splice(nIndex, 1)
+			this.set("tracks",aTracks);
+			this.trigger("change");
+
+    	},
+
+    	playSoundObject: function(sIdTrack, nIndexTrack) {
+
+			var self=this;
+			var aTracks = this.get("tracks");
+			var bLastTrack = true;
+			var oOptions = {
+				onfinish:function() {
+
+					if (typeof self.listIndexPlaying !== "undefined") {
+						self.listIndexPlaying += 1;
+						if (self.listIndexPlaying < self.listNumTracks) {
+			    			self.playSongList(self.listIndexPlaying);
+			    			bLastTrack = false;
+			    		}
+			    	}
+
+					if (bLastTrack) {
+				    	aTracks[nIndexTrack].playing = false;
+						self.set("tracks",aTracks);
+						self.trigger("change");
+				    	delete self.listIndexPlaying;
+				    }
+				}
+			}
+
 			window.soundObj = SC.stream(sIdTrack);
-			
 			window.soundObj.souncloudTrack = sIdTrack;
-			window.soundObj.play();
+
+
+
+
+			window.soundObj.play(oOptions);
 			this.trackPlaying = true;
 
     	},
@@ -57,15 +113,13 @@
 			var sIdTrack = aTracks[index].id;
 
 			this.trackPlaying = false;
-		
-
 
 			if ( !bIsLoaded ) {
 
 				this.trackPlaying = true;
 
 				SC.whenStreamingReady(function(){
-					self.playSoundObject(sIdTrack);
+					self.playSoundObject(sIdTrack, index);
 				});		
 
 			}
@@ -76,7 +130,7 @@
 				if (!window.soundObj.souncloudTrack) {
 					// first track playing
 					aTracks = this.cleanPlaying(aTracks);
-					self.playSoundObject(sIdTrack);
+					self.playSoundObject(sIdTrack, index);
 				}
 				else if (window.soundObj.souncloudTrack === sIdTrack){
 					
@@ -95,7 +149,7 @@
 				else {
 					// new track playing
 					aTracks = this.cleanPlaying(aTracks);
-					self.playSoundObject(sIdTrack);
+					self.playSoundObject(sIdTrack, index);
 				}
 
 			}
@@ -322,7 +376,7 @@
 				
 			},
 
-			addSong: function() {
+			addSong: function(eEvent) {
 
 				var aTracks = this.model.get("tracks");
 				var oTrack = {
@@ -338,7 +392,7 @@
 				this.model.trigger("change");
 				window.soundObj.stop();
 					
-
+				eEvent.preventDefault();
 			},
 
 			render: function() {
@@ -358,7 +412,9 @@
 		    events: {
 		      "click .edit" : "edit",
 		      "click .delete" : "deletePlaylist",
-		      "click .track" : "playSong"
+		      "click .track" : "playSong",
+		      "click .remove" : "removeSong",
+		      "click .play_list" : "playList"
 
 		     },
 
@@ -372,6 +428,25 @@
 				this.model.bind('change', this.render, this);
 				this.model.bind('destroy', this.remove, this);
 				
+			},
+
+			playList : function (eEvent) {
+
+				this.model.playList();
+				eEvent.preventDefault();	
+
+			},
+
+			removeSong : function(eEvent) {
+				
+				var oLink = $(eEvent.target).parent().find(".track")[0];
+				var nIndex = (oLink.id).split("#")[0];
+				
+				var bConfirmed = confirm("Are you sure you want to delete the track " + $(oLink).text() + " from this playlist");
+				if (bConfirmed) {
+					this.model.removeTrack (nIndex);
+				}
+				eEvent.preventDefault();	
 			},
 
 			playSong: function(eEvent) {
