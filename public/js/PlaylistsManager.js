@@ -17,8 +17,7 @@
 
  	// Set our CLIENT ID so we can use SC calls without
  	// passing it at every call    
- 	// See [SoundCloud Javascript SDK Authentication](http://developers.soundcloud.com/docs/javascript-sdk#authentication) 
- 	
+ 	// See [SoundCloud Javascript SDK Authentication](http://developers.soundcloud.com/docs/javascript-sdk#authentication)
 	SC.initialize({ client_id: "2c73737268dcb58ba837ab14ea99a31b" });
 
 	  
@@ -141,11 +140,11 @@
 			_.each(aTracks, function(track){ track.playing=false; });
 			return aTracks;
 
-    	},
+		},
 
 		// Play the track (or pause it). Controls if we have changed the track
 		// so we can set the proper states to the tracks in the list
-    	playTrack : function(index) {
+		playTrack : function(index) {
 
 			var bIsSameSong = false;
 			var bIsLoaded = (typeof(window.soundObj) !== 'undefined' );
@@ -210,7 +209,7 @@
 			// trigger `change`so the views can be updated	
 			this.trigger("change");
 		
-    	} 
+		} 
 	});
 
 	// ###SetPlaylists
@@ -640,7 +639,7 @@
 		
 		});
 		
-		// Instance or MAIN view at window.PlaylistsManagerApp
+		// Instance our MAIN view at `window.PlaylistsManagerApp`
 		window.PlaylistsManagerApp = new LibraryView({
 			collection: playlists
 		});
