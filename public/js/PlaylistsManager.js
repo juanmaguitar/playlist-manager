@@ -19,9 +19,7 @@
  	// passing it at every call    
  	// See [SoundCloud Javascript SDK Authentication](http://developers.soundcloud.com/docs/javascript-sdk#authentication) 
  	
-	SC.initialize({
-    	client_id: "2c73737268dcb58ba837ab14ea99a31b"
-	});
+	SC.initialize({ client_id: "2c73737268dcb58ba837ab14ea99a31b" });
 
 	  
     // Models & Collections
@@ -54,8 +52,8 @@
 
 				// Set `this.listIndexPlaying` that is going to set if we  
 				// should play some track when this one finish playing
-	    		this.listIndexPlaying = 0;
-	    		this.listNumTracks  = nNumTracks;
+				this.listIndexPlaying = 0;
+				this.listNumTracks  = nNumTracks;
 
 				// Bagin playing of the list
 				this.playTrack(this.listIndexPlaying);
