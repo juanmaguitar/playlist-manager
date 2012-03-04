@@ -12,13 +12,100 @@
     // ###Playlist
     // Model. Represents an Playlist that contains tracks
 	window.Playlist = Backbone.Model.extend({
+
  		defaults: function() {
       		return {
+      			playing: false,
       			title: '',
       			description: '',
       			tracks: []
       		};
     	},
+
+    	playSoundObject: function(sIdTrack) {
+
+    		
+			window.soundObj = SC.stream(sIdTrack);
+			
+			window.soundObj.souncloudTrack = sIdTrack;
+			window.soundObj.play();
+			this.trackPlaying = true;
+
+    	},
+
+    	cleanPlaying: function(aTracks) {
+    		
+    		if (window.soundObj) {
+	    		if (!!window.soundObj.playState) {
+	    			window.soundObj.stop();	
+	    			this.trackPlaying = false;
+	    		}
+    		}
+
+			_.each(aTracks, function(track){ track.playing=false; });
+			return aTracks;
+    	},
+
+    	playSongList : function(index, list) {
+
+			var bIsSameSong = false;
+			var bIsLoaded = (typeof(window.soundObj) !== 'undefined' );
+			
+			var sAction = '';
+			var self=this;
+			var aTracks = this.get("tracks");
+			var sIdTrack = aTracks[index].id;
+
+			this.trackPlaying = false;
+		
+
+
+			if ( !bIsLoaded ) {
+
+				this.trackPlaying = true;
+
+				SC.whenStreamingReady(function(){
+					self.playSoundObject(sIdTrack);
+				});		
+
+			}
+			else {
+
+				this.trackPlaying = !window.soundObj.paused && !!window.soundObj.playState;
+
+				if (!window.soundObj.souncloudTrack) {
+					// first track playing
+					aTracks = this.cleanPlaying(aTracks);
+					self.playSoundObject(sIdTrack);
+				}
+				else if (window.soundObj.souncloudTrack === sIdTrack){
+					
+					// same track playing/pausing
+					if (this.trackPlaying) {
+						sAction = 'pause';
+						this.trackPlaying = false;
+					}
+					else {
+						sAction = 'play';
+						this.trackPlaying = true;
+					}
+					
+					window.soundObj[sAction]();
+				}
+				else {
+					// new track playing
+					aTracks = this.cleanPlaying(aTracks);
+					self.playSoundObject(sIdTrack);
+				}
+
+			}
+			
+			aTracks[index].playing = this.trackPlaying;
+			this.set("tracks",aTracks);
+
+			this.trigger("change");
+		
+    	} 
 	});
 
 	// ###SetPlaylists
@@ -194,7 +281,6 @@
 				var sIdSong = aParts[aParts.length-1]
 				var self = this;
 
-				// console.log ("vamos a añadir: " + sIdSong + " de " + sUser + " to " + this.model.get("title"));
 				eEvent.preventDefault();
 
 				if (sUser && sIdSong ) {
@@ -217,6 +303,9 @@
 							self.songDetails = oTrackFound;
 
 						    SC.whenStreamingReady(function(){
+						    	if (window.soundObj) {
+						    		window.soundObj.stop();
+						    	}
   								window.soundObj = SC.stream(oTrackFound.id);
 							});
 
@@ -275,6 +364,10 @@
 
 			initialize: function() {
 
+				var aTracks = this.model.get("tracks");
+				aTracks = this.model.cleanPlaying(aTracks);
+				this.model.set("tracks",aTracks);
+
 				this.input = this.$('.edit input');
 				this.model.bind('change', this.render, this);
 				this.model.bind('destroy', this.remove, this);
@@ -282,77 +375,13 @@
 			},
 
 			playSong: function(eEvent) {
-
-				
-
-				eEvent.preventDefault();
-
+		
 				var oLink = $(eEvent.target).closest("a")[0];
-				var aUrlParts = oLink.href.split('#');
-				var sUrlTrack = aUrlParts[0];
-				var sIdTrack = aUrlParts[1];
+				var sIndexTrack = oLink.id.split("#")[0];
 
-				var bIsSameSong = false;
-				var bIsLoaded = (typeof(window.soundObj) !== 'undefined' );
-				var bIsPlaying = false;
-				var sAction = '';
-
-				// console.log (window.soundObj);
-				// console.log (sUrlTrack + " --> " + sIdTrack);
-
-
-				if ( !bIsLoaded ) {
-
-					SC.whenStreamingReady(function(){
-						window.soundObj = SC.stream(sIdTrack);
-						window.soundObj.souncloudTrack = sIdTrack;
-						window.soundObj.play();
-
-						$(oLink).toggleClass("playing", true);
-					});		
-
-				}
-				else {
-
-					bIsPlaying = !window.soundObj.paused && !!window.soundObj.playState;
-
-					if (!window.soundObj.souncloudTrack) {
-
-						window.soundObj.stop();
-						window.soundObj.souncloudTrack = sIdTrack;
-						window.soundObj.play();
-
-
-						$(oLink).closest("ol").find("a").removeClass("playing");
-						$(oLink).addClass("playing", true);
-
-
-						// console.log ("empezamos con este tema");
-					}
-					else if (window.soundObj.souncloudTrack === sIdTrack){
-						
-						sAction = bIsPlaying ? 'pause' : 'play';	
-						window.soundObj[sAction]();
-						// console.log ("seguimos con el mismo tema");
-						$(oLink).toggleClass("playing", !bIsPlaying);
-					}
-					else {
-
-						window.soundObj.stop();
-						window.soundObj = SC.stream(sIdTrack);
-						window.soundObj.souncloudTrack = sIdTrack;
-						window.soundObj.play();
-						
-						$(oLink).closest("ol").find("a").removeClass("playing");
-						$(oLink).addClass("playing", true);
-
-						// console.log ("NUEVO tema");
-					}
-
-					// console.log ("YA HAY una cancion cargada y toca hacer: " + sAction);
-
-				}
-
+				this.model.playSongList(sIndexTrack, false);
+				eEvent.preventDefault();
+				
 			},
 
 			deletePlaylist: function (eEvent) {
@@ -379,14 +408,12 @@
 				
 				var renderedContent = this.template( this.model.toJSON() );
 				var bIsLoaded = (typeof(window.soundObj) !== 'undefined' );
+				var bIsPlaying = this.model.get("playing");
 
 				// TO-DO.: check a better place for this
 				var viewSongNew = new SongNewView({
 					model: this.model
 				});
-
-				
-				bIsLoaded ?	window.soundObj.stop() : null;
 
 				$(this.el).html(renderedContent);
 				$(this.el).append( viewSongNew.render().el );
