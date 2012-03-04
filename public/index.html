@@ -80,8 +80,8 @@
       </div>
 
       <ol class="tracks">
-        <% _.each(tracks, function(track) { %>
-          <li><a class="track" href="<%= track.url %>#<%= track.id %>"><strong><%= track.title %></strong> <em><%= track.user %></em></a></li>
+        <% _.each(tracks, function(track, index) { %>
+          <li><a class="track <% if (track.playing === true) { %> playing <% } %>" title="<%= track.title %>" id="<%= index %>#<%= track.id %>" href="<%= track.url %>"><strong><%= track.title %></strong> <em><%= track.user %></em></a></li>
         <% }); %>
       </ol>
 
