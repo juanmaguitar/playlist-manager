@@ -20,8 +20,21 @@ a new playlist model is instanced</p>             </td>             <td class="c
 				<span class="nx">playing</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
 				<span class="nx">title</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
 				<span class="nx">description</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+				<span class="nx">uri</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
 				<span class="nx">tracks</span><span class="o">:</span> <span class="p">[]</span>
 			<span class="p">};</span>
+		<span class="p">},</span>
+
+		<span class="nx">titleToUrl</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">title</span><span class="p">)</span> <span class="p">{</span>
+
+			<span class="kd">var</span> <span class="nx">sUrl</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+
+    		<span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">title</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">();</span> <span class="c1">// lowercase</span>
+    		<span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">sUrl</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/^\s+|\s+$/g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">);</span> <span class="c1">// remove leading and trailing whitespaces</span>
+			<span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">sUrl</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/\s+/g</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">);</span> <span class="c1">// convert (continuous) whitespaces to one -</span>
+			<span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">sUrl</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/[^a-z-]/g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">);</span> <span class="c1">// remove everything that is not [a-z] or -</span>
+			<span class="nx">sUrl</span> <span class="o">=</span> <span class="nx">sUrl</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/-{2}/g</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">);</span> <span class="c1">// remove every two -</span>
+			<span class="k">return</span> <span class="nx">sUrl</span><span class="p">;</span>
 		<span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-9">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-9">&#182;</a>               </div>               <p>Plays all songs in a list</p>             </td>             <td class="code">               <div class="highlight"><pre>		<span class="nx">playList</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
 			<span class="kd">var</span> <span class="nx">aTracks</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s2">&quot;tracks&quot;</span><span class="p">);</span>
@@ -147,10 +160,22 @@ Base Collection. Connected with the API (in our case with localStorage).</p>    
 				<span class="s2">&quot;click .cancel&quot;</span> <span class="o">:</span> <span class="s2">&quot;cancel&quot;</span>
 			<span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-41">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-41">&#182;</a>               </div>               <p>Save the data to localStorage (New or Edit)</p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">save</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">eEvent</span><span class="p">)</span> <span class="p">{</span>
 
+
+				<span class="kd">var</span> <span class="nx">sTitle</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;input[name=&#39;title&#39;]&quot;</span><span class="p">).</span><span class="nx">val</span><span class="p">();</span>
+				<span class="kd">var</span> <span class="nx">sDesc</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;textarea[name=&#39;description&#39;]&quot;</span><span class="p">).</span><span class="nx">val</span><span class="p">();</span>
+				<span class="kd">var</span> <span class="nx">sUri</span> <span class="o">=</span>  <span class="k">this</span><span class="p">.</span><span class="nx">model</span><span class="p">.</span><span class="nx">titleToUrl</span><span class="p">(</span><span class="nx">sTitle</span><span class="p">);</span>
+        
 				<span class="kd">var</span> <span class="nx">oData</span> <span class="o">=</span> <span class="p">{</span>
-					<span class="nx">title</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;input[name=&#39;title&#39;]&quot;</span><span class="p">).</span><span class="nx">val</span><span class="p">(),</span>
-					<span class="nx">description</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">$</span><span class="p">(</span><span class="s2">&quot;textarea[name=&#39;description&#39;]&quot;</span><span class="p">).</span><span class="nx">val</span><span class="p">()</span>
+					<span class="nx">title</span><span class="o">:</span> <span class="nx">sTitle</span><span class="p">,</span>
+					<span class="nx">description</span><span class="o">:</span> <span class="nx">sDesc</span><span class="p">,</span>
+					<span class="nx">uri</span><span class="o">:</span> <span class="nx">sUri</span>
 				<span class="p">};</span>
+<span class="cm">/*</span>
+<span class="cm">				var oData = {</span>
+<span class="cm">					title: this.$(&quot;input[name=&#39;title&#39;]&quot;).val(),</span>
+<span class="cm">					description: this.$(&quot;textarea[name=&#39;description&#39;]&quot;).val()</span>
+<span class="cm">				};</span>
+<span class="cm">				*/</span>
 				<span class="kd">var</span> <span class="nx">bIsNew</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">model</span><span class="p">.</span><span class="nx">isNew</span><span class="p">();</span>
 				
 				<span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">bIsNew</span><span class="p">)</span> <span class="p">{</span>
@@ -159,6 +184,7 @@ Base Collection. Connected with the API (in our case with localStorage).</p>    
 				<span class="k">else</span> <span class="p">{</span>
 					<span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">oData</span><span class="p">);</span>	
 					<span class="k">this</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+					<span class="nb">window</span><span class="p">.</span><span class="nx">oPlaylistsApp</span><span class="p">.</span><span class="nx">navigate</span><span class="p">(</span><span class="s2">&quot;playlists/&quot;</span><span class="o">+</span><span class="nx">oData</span><span class="p">.</span><span class="nx">uri</span><span class="p">,</span> <span class="p">{</span><span class="nx">trigger</span><span class="o">:</span> <span class="kc">true</span><span class="p">});</span>
 				<span class="p">}</span>
 
 				<span class="nx">eEvent</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
@@ -389,6 +415,8 @@ if this URL corresponds to an existing track</p>             </td>             <
 					<span class="k">this</span><span class="p">.</span><span class="nx">model</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>
 				<span class="p">}</span>
 
+				<span class="nb">window</span><span class="p">.</span><span class="nx">oPlaylistsApp</span><span class="p">.</span><span class="nx">navigate</span><span class="p">(</span><span class="s2">&quot;home&quot;</span><span class="p">,</span> <span class="p">{</span><span class="nx">trigger</span><span class="o">:</span> <span class="kc">true</span><span class="p">});</span>
+
 				<span class="nx">eEvent</span><span class="p">.</span><span class="nx">preventDefault</span><span class="p">();</span>
 			<span class="p">},</span>
 			</pre></div>             </td>           </tr>                               <tr id="section-67">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-67">&#182;</a>               </div>               <p>show edit form of this playlist with view <code>PlaylistEditView</code></p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">edit</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">eEvent</span><span class="p">)</span> <span class="p">{</span>
@@ -414,13 +442,7 @@ if this URL corresponds to an existing track</p>             </td>             <
 		
 		<span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-68">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-68">&#182;</a>               </div>               <h3>LibraryView</h3>
 
-<p>MAIN view. List of all playlists </p>             </td>             <td class="code">               <div class="highlight"><pre>		<span class="nx">LibraryView</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span> <span class="p">({</span>
-
- 			<span class="nx">el</span><span class="o">:</span> <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#list_playlists&quot;</span><span class="p">),</span>
-
-			<span class="nx">initialize</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-
-				<span class="nx">console</span><span class="p">.</span><span class="nx">log</span> <span class="p">(</span><span class="s2">&quot;updated&quot;</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-69">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-69">&#182;</a>               </div>               <p>Create the view to add new playlists</p>             </td>             <td class="code">               <div class="highlight"><pre>				<span class="kd">var</span> <span class="nx">viewNew</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PlaylistNewView</span><span class="p">({</span>
+<p>MAIN view. List of all playlists </p>             </td>             <td class="code">               <div class="highlight"><pre>		<span class="nx">LibraryView</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">View</span><span class="p">.</span><span class="nx">extend</span> <span class="p">({</span></pre></div>             </td>           </tr>                               <tr id="section-69">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-69">&#182;</a>               </div>               <p>el: $("#list_playlists"),</p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">initialize</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span></pre></div>             </td>           </tr>                               <tr id="section-70">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-70">&#182;</a>               </div>               <p>Create the view to add new playlists</p>             </td>             <td class="code">               <div class="highlight"><pre>				<span class="kd">var</span> <span class="nx">viewNew</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PlaylistNewView</span><span class="p">({</span>
 					<span class="nx">collection</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">collection</span>
 				<span class="p">});</span>
 
@@ -428,30 +450,69 @@ if this URL corresponds to an existing track</p>             </td>             <
 
 				<span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">showOne</span><span class="p">);</span>
 				<span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">bind</span><span class="p">(</span><span class="s1">&#39;reset&#39;</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">showAll</span><span class="p">);</span>
-				</pre></div>             </td>           </tr>                               <tr id="section-70">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-70">&#182;</a>               </div>               <p>Get the data from localStorage</p>             </td>             <td class="code">               <div class="highlight"><pre>				<span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+				</pre></div>             </td>           </tr>                               <tr id="section-71">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-71">&#182;</a>               </div>               <p>Get the data from localStorage</p>             </td>             <td class="code">               <div class="highlight"><pre>				<span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
 
 			<span class="p">},</span>
-			</pre></div>             </td>           </tr>                               <tr id="section-71">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-71">&#182;</a>               </div>               <p>Show a Playlist</p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">showOne</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">playlist</span> <span class="p">)</span> <span class="p">{</span>
+			</pre></div>             </td>           </tr>                               <tr id="section-72">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-72">&#182;</a>               </div>               <p>Show a Playlist</p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">showOne</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">playlist</span> <span class="p">)</span> <span class="p">{</span>
 				<span class="kd">var</span> <span class="nx">view</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PlaylistView</span><span class="p">({</span> <span class="nx">model</span><span class="o">:</span> <span class="nx">playlist</span> <span class="p">});</span>
 				<span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">el</span><span class="p">).</span><span class="nx">append</span><span class="p">(</span> <span class="nx">view</span><span class="p">.</span><span class="nx">render</span><span class="p">().</span><span class="nx">el</span> <span class="p">);</span>
 			<span class="p">},</span>
-			</pre></div>             </td>           </tr>                               <tr id="section-72">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-72">&#182;</a>               </div>               <p>Show all Playlists </p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">showAll</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+			</pre></div>             </td>           </tr>                               <tr id="section-73">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-73">&#182;</a>               </div>               <p>Show all Playlists </p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">showAll</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 				<span class="k">this</span><span class="p">.</span><span class="nx">collection</span><span class="p">.</span><span class="nx">each</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">showOne</span><span class="p">);</span>
 			<span class="p">},</span>
 
 			<span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
 
-				<span class="kd">var</span> <span class="nx">renderedContent</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">template</span><span class="p">(</span> <span class="k">this</span><span class="p">.</span><span class="nx">model</span><span class="p">.</span><span class="nx">toJSON</span><span class="p">()</span> <span class="p">);</span>
-				<span class="nx">$</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">el</span><span class="p">).</span><span class="nx">html</span><span class="p">(</span><span class="nx">renderedContent</span><span class="p">);</span>
-				
 				<span class="k">return</span> <span class="k">this</span><span class="p">;</span>	
+
 			<span class="p">}</span>
 		
-		<span class="p">});</span>
-		</pre></div>             </td>           </tr>                               <tr id="section-73">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-73">&#182;</a>               </div>               <p>Instance or MAIN view at window.PlaylistsManagerApp</p>             </td>             <td class="code">               <div class="highlight"><pre>		<span class="nb">window</span><span class="p">.</span><span class="nx">PlaylistsManagerApp</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LibraryView</span><span class="p">({</span>
-			<span class="nx">collection</span><span class="o">:</span> <span class="nx">playlists</span>
+		<span class="p">});</span></pre></div>             </td>           </tr>                               <tr id="section-74">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-74">&#182;</a>               </div>               <h3>PlaylistsAppRouter</h3>
+
+<p>Entry points of our app <br />
+instance: <code>new PlaylistsAppRouter();</code></p>             </td>             <td class="code">               <div class="highlight"><pre>		<span class="nx">PlaylistsAppRouter</span> <span class="o">=</span> <span class="nx">Backbone</span><span class="p">.</span><span class="nx">Router</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span></pre></div>             </td>           </tr>                               <tr id="section-75">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-75">&#182;</a>               </div>               <p>url's of our app</p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">routes</span><span class="o">:</span><span class="p">{</span>
+				<span class="s2">&quot;home&quot;</span><span class="o">:</span> <span class="s2">&quot;showLibrary&quot;</span><span class="p">,</span>
+				<span class="s2">&quot;&quot;</span><span class="o">:</span> <span class="s2">&quot;showLibrary&quot;</span><span class="p">,</span>
+				<span class="s2">&quot;playlists/:uri&quot;</span> <span class="o">:</span> <span class="s2">&quot;showPlaylist&quot;</span>
+			<span class="p">},</span>
+
+			<span class="nx">initialize</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+
+				<span class="kd">var</span> <span class="nx">self</span> <span class="o">=</span> <span class="k">this</span><span class="p">;</span>
+
+				<span class="k">this</span><span class="p">.</span><span class="nx">mainContainer</span> <span class="o">=</span> <span class="nx">$</span><span class="p">(</span><span class="s2">&quot;#list_playlists&quot;</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-76">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-76">&#182;</a>               </div>               <p>Create an instance of this collection</p>             </td>             <td class="code">               <div class="highlight"><pre>				<span class="k">this</span><span class="p">.</span><span class="nx">playlists</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">SetPlaylists</span><span class="p">();</span>
+				<span class="k">this</span><span class="p">.</span><span class="nx">playlists</span><span class="p">.</span><span class="nx">fetch</span><span class="p">();</span>
+
+			<span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-77">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-77">&#182;</a>               </div>               <p>Shows the list of Playlists</p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">showLibrary</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+
+				<span class="kd">var</span> <span class="nx">playlists</span>  <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">playlists</span><span class="p">;</span>
+
+				<span class="k">this</span><span class="p">.</span><span class="nx">myLibraryView</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LibraryView</span><span class="p">({</span> <span class="nx">collection</span><span class="o">:</span> <span class="nx">playlists</span> <span class="p">});</span>	
+				<span class="k">this</span><span class="p">.</span><span class="nx">mainContainer</span><span class="p">.</span><span class="nx">html</span><span class="p">(</span> <span class="k">this</span><span class="p">.</span><span class="nx">myLibraryView</span><span class="p">.</span><span class="nx">render</span><span class="p">().</span><span class="nx">el</span> <span class="p">);</span>
+
+			<span class="p">},</span></pre></div>             </td>           </tr>                               <tr id="section-78">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-78">&#182;</a>               </div>               <p>Shows a single Playlist</p>             </td>             <td class="code">               <div class="highlight"><pre>			<span class="nx">showPlaylist</span><span class="o">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">uri</span><span class="p">)</span> <span class="p">{</span>
+
+				<span class="kd">var</span> <span class="nx">currentPLaylist</span> <span class="o">=</span> <span class="nx">_</span><span class="p">.</span><span class="nx">find</span><span class="p">(</span><span class="nx">oPlaylistsApp</span><span class="p">.</span><span class="nx">playlists</span><span class="p">.</span><span class="nx">models</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">track</span><span class="p">){</span> 
+					<span class="k">return</span> <span class="nx">track</span><span class="p">.</span><span class="nx">attributes</span><span class="p">.</span><span class="nx">uri</span> <span class="o">===</span> <span class="nx">uri</span> <span class="p">;</span> 
+				<span class="p">});</span>
+
+				<span class="k">if</span> <span class="p">(</span><span class="nx">currentPLaylist</span><span class="p">)</span> <span class="p">{</span>
+					<span class="k">this</span><span class="p">.</span><span class="nx">myPlaylistView</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PlaylistView</span><span class="p">({</span> <span class="nx">model</span><span class="o">:</span> <span class="nx">currentPLaylist</span> <span class="p">});</span>
+					<span class="k">this</span><span class="p">.</span><span class="nx">mainContainer</span><span class="p">.</span><span class="nx">html</span><span class="p">(</span> <span class="k">this</span><span class="p">.</span><span class="nx">myPlaylistView</span><span class="p">.</span><span class="nx">render</span><span class="p">().</span><span class="nx">el</span> <span class="p">);</span>
+				<span class="p">}</span>
+				<span class="k">else</span> <span class="p">{</span>
+					<span class="cm">/* console.log(&quot;the URL doesn&#39;t corresponds to any playlist &quot;) */</span>
+					<span class="k">this</span><span class="p">.</span><span class="nx">showLibrary</span><span class="p">();</span>
+				<span class="p">}</span>
+
+			<span class="p">}</span>
+
+        	
 		<span class="p">});</span>
 
+	    <span class="nb">window</span><span class="p">.</span><span class="nx">oPlaylistsApp</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">PlaylistsAppRouter</span><span class="p">();</span>
+	    <span class="nx">Backbone</span><span class="p">.</span><span class="nx">history</span><span class="p">.</span><span class="nx">start</span><span class="p">();</span>
+		
 	<span class="p">});</span>
 
 

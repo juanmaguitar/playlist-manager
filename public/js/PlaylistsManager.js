@@ -670,6 +670,7 @@
 		// instance: `new PlaylistsAppRouter();`
 		PlaylistsAppRouter = Backbone.Router.extend({
 
+			// url's of our app
 			routes:{
 				"home": "showLibrary",
 				"": "showLibrary",
@@ -698,6 +699,7 @@
 
 			},
 
+			// Shows a single Playlist
 			showPlaylist: function(uri) {
 
 				var currentPLaylist = _.find(oPlaylistsApp.playlists.models, function(track){ 
