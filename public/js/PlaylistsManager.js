@@ -38,10 +38,22 @@
 				playing: false,
 				title: '',
 				description: '',
+				uri: '',
 				tracks: []
 			};
 		},
 
+		titleToUrl: function (title) {
+
+			var sUrl = '';
+
+    		sUrl = title.toLowerCase(); // lowercase
+    		sUrl = sUrl.replace(/^\s+|\s+$/g, ''); // remove leading and trailing whitespaces
+			sUrl = sUrl.replace(/\s+/g, '-'); // convert (continuous) whitespaces to one -
+			sUrl = sUrl.replace(/[^a-z-]/g, ''); // remove everything that is not [a-z] or -
+			sUrl = sUrl.replace(/-{2}/g, ''); // remove every two -
+			return sUrl;
+		},
 
  		// Plays all songs in a list
 		playList: function() {
@@ -258,10 +270,22 @@
 			// Save the data to localStorage (New or Edit)
 			save: function (eEvent) {
 
+
+				var sTitle = this.$("input[name='title']").val();
+				var sDesc = this.$("textarea[name='description']").val();
+				var sUri =  this.model.titleToUrl(sTitle);
+        
+				var oData = {
+					title: sTitle,
+					description: sDesc,
+					uri: sUri
+				};
+/*
 				var oData = {
 					title: this.$("input[name='title']").val(),
 					description: this.$("textarea[name='description']").val()
 				};
+				*/
 				var bIsNew = this.model.isNew();
 				
 				if (!bIsNew) {
@@ -270,6 +294,7 @@
 				else {
 					this.collection.create(oData);	
 					this.close();
+					window.oPlaylistsApp.navigate("playlists/"+oData.uri, {trigger: true});
 				}
 
 				eEvent.preventDefault();
@@ -569,6 +594,8 @@
 					this.model.destroy();
 				}
 
+				window.oPlaylistsApp.navigate("home", {trigger: true});
+
 				eEvent.preventDefault();
 			},
 			
@@ -600,11 +627,9 @@
 		// MAIN view. List of all playlists 
 		LibraryView = Backbone.View.extend ({
 
- 			el: $("#list_playlists"),
+ 			//el: $("#list_playlists"),
 
 			initialize: function() {
-
-				console.log ("updated");
 
 				// Create the view to add new playlists
 				var viewNew = new PlaylistNewView({
@@ -634,19 +659,68 @@
 
 			render: function() {
 
-				var renderedContent = this.template( this.model.toJSON() );
-				$(this.el).html(renderedContent);
-				
 				return this;	
+
 			}
 		
 		});
-		
-		// Instance or MAIN view at window.PlaylistsManagerApp
-		window.PlaylistsManagerApp = new LibraryView({
-			collection: playlists
+
+		// ###PlaylistsAppRouter
+		// Entry points of our app    
+		// instance: `new PlaylistsAppRouter();`
+		PlaylistsAppRouter = Backbone.Router.extend({
+
+			routes:{
+				"home": "showLibrary",
+				"": "showLibrary",
+				"playlists/:uri" : "showPlaylist"
+			},
+
+			initialize: function(options) {
+
+				var self = this;
+
+				this.mainContainer = $("#list_playlists");
+
+				// Create an instance of this collection
+				this.playlists = new SetPlaylists();
+				this.playlists.fetch();
+
+			},
+
+			// Shows the list of Playlists
+			showLibrary: function() {
+
+				var playlists  = this.playlists;
+
+				this.myLibraryView = new LibraryView({ collection: playlists });	
+				this.mainContainer.html( this.myLibraryView.render().el );
+
+			},
+
+			showPlaylist: function(uri) {
+
+				var currentPLaylist = _.find(oPlaylistsApp.playlists.models, function(track){ 
+					return track.attributes.uri === uri ; 
+				});
+
+				if (currentPLaylist) {
+					this.myPlaylistView = new PlaylistView({ model: currentPLaylist });
+					this.mainContainer.html( this.myPlaylistView.render().el );
+				}
+				else {
+					/* console.log("the URL doesn't corresponds to any playlist ") */
+					this.showLibrary();
+				}
+
+			}
+
+        	
 		});
 
+	    window.oPlaylistsApp = new PlaylistsAppRouter();
+	    Backbone.history.start();
+		
 	});
 
 

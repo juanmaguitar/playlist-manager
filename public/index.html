@@ -26,59 +26,16 @@
 
     <script src="js/PlaylistsManager.js"></script>
 
-    <style>
-
-      .hidden { display:none; }
-      div.pl_container  { margin:50px 0; }
-        div.pl_container .title a.play_list { float: left; background-image: url(img/player-large-buttons.png);background-position: -4px -4px; display: block; width: 85px; margin: 15px 25px 7px 0; text-indent: -999px; height: 90px; }
-
-        div.pl_container .title, fieldset.edit_playlist { position:relative; padding:0px 20px; border:1px solid #ccc; }
-        div.pl_container .title { min-height:120px; margin-bottom:40px; }
-        div.pl_container .title h2 { color: #06C; font-size: 28px; margin:30px 0 15px 110px;} 
-        div.pl_container .title p { margin-left: 112px; width: 80%; }
-        div.pl_container .actions { position:absolute; right:10px; bottom:0px; list-style-type: none; }
-        div.pl_container .actions li { margin-left:10px; display: inline; }
-        div.pl_container ol.tracks { margin-bottom:30px; font-size:16px;}
-        div.pl_container ol.tracks li { margin-bottom:12px; }
-        div.pl_container ol.tracks li a.track { background: url("img/player-small-buttons.png") no-repeat -34px -5px;  height: 22px; padding:3px 0 0 31px; }
-        div.pl_container ol.tracks li a.playing { background-position:-34px -37px; }
-
-        div.pl_container ol.tracks li a.remove { font-family: "Lucida Grande", Helvetica, Arial, sans-serif; color: #BBB; font-size: 12px; line-height: 1.4em; margin-left: 10px; }
-         div.pl_container ol.tracks li a.remove:hover { color:#000; } 
-
-        fieldset.edit_playlist { padding:20px; }
-          fieldset.edit_playlist dl { margin:0; padding:0; }
-          fieldset.edit_playlist dl dd { margin:0 0 10px; padding:0; }
-
-        div.add_track a.see_form { margin:0 0 5px 15px; }
-        div.add_track a.see_form:after { content: ' '; height: 0; position: absolute; width: 0; border: 5px solid transparent; border-top-color: #06C; margin:5px;}
-        div.add_track div.add_track_container { display:none; }
-
-        div.add_track.adding a.see_form:after { border-top: none; border-bottom-color: #06C; }
-        div.add_track.adding div.add_track_container { display:block; }
-
-        div.add_track_container { border:0; padding:20px 20px 40px; background:#F0F6FB; }
-        div.add_track_container p.details { margin:10px 0; }
-
-        div.details_song { margin:10px 0; }
-        div.details_song p { margin:0; }
-
-        div.details_song div.data_song { background:#FFF; overflow: hidden; width: 430px; margin: 10px 0; border: 1px solid #ccc; }
-        div.details_song div.data_song a.play { float: left; background-image: url(img/player-large-buttons.png);background-position: -4px -4px; display: block; width: 85px; height: 100px; margin:13px 0 0 15px; text-indent:-999px;}
-        div.details_song div.data_song a.play.playing { background-position: -4px -103px; }
-        div.details_song div.data_song dl { float:right; overflow: hidden; padding:10px; width:300px; }
-        div.details_song div.data_song dl dt { clear: left; float: left; width: 40px; }
-        div.details_song div.data_song dl dd { float: left; width: 200px; font-weight:bold; font-style:italic;}
-
-
-    </style>
+    <script type="text/javascript">
+      var sUrlBase = "http://" + document.location.hostname + "/playlist-manager/public";
+    </script>
 
     <!-- #playlist-list-item-template --> 
 
     <script type="text/template" id="pl_listItem_tpl">
       <div class="title">
         <a class="play_list" href="#">Play</a>
-        <h2><%= title %></h2>
+        <h2><a href="<% print(sUrlBase) %>/#playlists/<%= uri %>"><%= title %></a></h2>
         <p><%= description %></p>
 
         <ul class="actions">
@@ -169,7 +126,11 @@
       <div id="container">
         
 
-        <p>The <strong>SoundCloud PlayList Manager</strong> allows you to <em>create playlists of ANY tracks on SoundCloud</em>:</p>
+        <p>The <a id="home_link" href="#">SoundCloud PlayList Manager</a> allows you to <em>create playlists of ANY tracks on SoundCloud</em>:</p>
+
+        <script type="text/javascript">
+          document.getElementById('home_link').href = sUrlBase + '/#home';
+        </script>
 
         <ul>
           <li>A user can edit and delete the playlists.</li>
@@ -177,8 +138,8 @@
           <li>A user can give a playlist a title and description.</li>
         </ul>
 
-        <div id="list_playlists"></div>
         <div id="new_playlist"></div>
+        <div id="list_playlists"></div>
 
       </div>
 
