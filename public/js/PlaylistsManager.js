@@ -17,11 +17,13 @@
 
  	// Set our CLIENT ID so we can use SC calls without
  	// passing it at every call    
- 	// See [SoundCloud Javascript SDK Authentication](http://developers.soundcloud.com/docs/javascript-sdk#authentication) 
- 	
+ 	// See [SoundCloud Javascript SDK Authentication](http://developers.soundcloud.com/docs/javascript-sdk#authentication)
 	SC.initialize({
     	client_id: "2c73737268dcb58ba837ab14ea99a31b"
 	});
+
+ 	// Here we can store temporary the data of the tracks found, being accesible by all methods
+	var oTrackDetails = {};
 
 	  
     // Models & Collections
@@ -43,6 +45,7 @@
 			};
 		},
 
+		// get a friendly URI from the title
 		titleToUrl: function (title) {
 
 			var sUrl = '';
@@ -224,7 +227,60 @@
 			// trigger `change`so the views can be updated	
 			this.trigger("change");
 		
-    	} 
+    	},
+
+		// If there's some data at `oTrackDetails` add this track to the model
+    	addTrack: function() {
+
+			var aTracks = [];
+			var oTrack  = null;
+
+			if (oTrackDetails) {
+
+				oTrack = {
+					id: oTrackDetails.id,
+					title: oTrackDetails.title,
+					user: oTrackDetails.user.username,
+					url: oTrackDetails.permalink_url
+				};
+
+				oTrackDetails = null;
+				aTracks = this.get("tracks");
+				aTracks.push(oTrack);
+
+				this.set("tracks",aTracks);
+				this.save();
+				this.trigger("change");
+			}
+
+			else {
+				console.log ("no hay nada bueno que añadir");
+				return false;
+			}
+			
+		},
+
+		// ask SoundCloud for the track and do something with the answer
+		getDetailsTrack: function( sUser, sIdSong, fpCallback ) {
+
+			var self =this;
+			oTrackDetails = null;
+
+			SC.get("/users/"+sUser+"/tracks.json", function(oTracks) {
+
+				$.each(oTracks, function(index, track) {
+					if ( track.permalink === sIdSong ) {
+						oTrackDetails = this;
+						if (typeof(fpCallback) === "function" ) {
+							fpCallback.call(self,track);
+						}
+					}
+				});
+
+			});
+			
+		}
+	 
 	});
 
 	// ###SetPlaylists
@@ -235,7 +291,14 @@
 		model: Playlist,
 
 		// Set the localStorage datastore
-		localStorage: new Store("playlists")
+		localStorage: new Store("playlists"),
+
+		// returns a playlist from a URI
+		playlistFromUri: function(uri) {
+			return _.find(oPlaylistsApp.playlists.models, function(track){ 
+					return track.attributes.uri === uri ; 
+				});
+		} 
 				
 	})
 
@@ -429,7 +492,7 @@
 			
 			// The DOM events of this view
 			events: {
-				"click .details a" : "getDetailsSong",
+				"click .details a" : "detailsTrack",
 				"click .add a.button" : "addSong",
 				"click .add .cancel" : "cancel",
 				"click a.see_form" : "show",
@@ -453,44 +516,19 @@
 		    
 			// Show details of the track found through the API
 			// using view `SongDetailsView`
-			showTrackDetails : function ( sIdSong, oTracks ) {
+			showDetailsTrack : function ( oTrack ) {
 
-				var viewSongDetails = null;
-				var oTrackFound = this.findTrackInResults( sIdSong, oTracks );
+				var viewSongDetails = new SongDetailsView({ data: oTrack });
+				
+				this.$('p.details').hide();
+				this.$('p.add').show().before( viewSongDetails.render().el );
 
-				if (oTrackFound) {
-					viewSongDetails = new SongDetailsView({ data: oTrackFound });
-					
-					this.$('p.details').hide();
-					this.$('p.add').show().before( viewSongDetails.render().el );
-					this.songDetails = oTrackFound;
-				}
-				else {
-					/* console.log ("we found nothing"); */
-				}
-
-			},
-
-			// Find track-ID in the tracks found
-			findTrackInResults: function( sIdSong, oTracks ){
-
-				var oTrackFound = null;
-
-				$.each(oTracks, function(index, track) {
-
-					if ( track.permalink === sIdSong ) {
-						oTrackFound = track;
-					}
-				});
-
-				return oTrackFound;
 				
 			},
 
-
     		// If we can "decipher" the URL, call the API to check
     		// if this URL corresponds to an existing track
-			getDetailsSong: function(eEvent) {
+			detailsTrack: function(eEvent) {
 
 				var sUrlSong = this.$('input').val();
 				var aParts = sUrlSong.split("/");
@@ -498,12 +536,9 @@
 				var sUser = aParts[aParts.length-2]
 				var sIdSong = aParts[aParts.length-1]
 
-				if (sUser && sIdSong ) {
-					SC.get("/users/"+sUser+"/tracks.json", _.bind( this.showTrackDetails, this, sIdSong ) );
-				}
-				else {
-					/* console.log ("we found nothing"); */
-				}
+				var fpGetDetailsTrack = this.model.getDetailsTrack;
+
+				fpGetDetailsTrack.call (this, sUser ,sIdSong, this.showDetailsTrack);
 
 				eEvent.preventDefault();
 				
@@ -512,21 +547,12 @@
     		// Add current track to the playlist 
 			addSong: function(eEvent) {
 
-				var aTracks = this.model.get("tracks");
-				var oTrack = {
-					id: this.songDetails.id,
-					title: this.songDetails.title,
-					user: this.songDetails.user.username,
-					url: this.songDetails.permalink_url
-				};
-				aTracks.push(oTrack);
+				this.model.addTrack();
 
-				this.model.set("tracks",aTracks);
-				this.model.save();
-				this.model.trigger("change");
+				if (window.soundObj) {
+					window.soundObj.stop();	
+				}
 
-				window.soundObj.stop();
-					
 				eEvent.preventDefault();
 			},
 
@@ -718,12 +744,13 @@
 			// Shows a single Playlist
 			showPlaylist: function(uri) {
 
-				var currentPLaylist = _.find(oPlaylistsApp.playlists.models, function(track){ 
-					return track.attributes.uri === uri ; 
-				});
+				var currentPLaylist = this.playlists.playlistFromUri(uri);
+				var viewNew = null;
 
 				if (currentPLaylist) {
 					this.myPlaylistView = new PlaylistView({ model: currentPLaylist });
+					viewNew = new PlaylistNewView({	collection: this.playlists	});
+
 					this.mainContainer.html( this.myPlaylistView.render().el );
 				}
 				else {
@@ -733,10 +760,18 @@
 
 			},
 
+			// add the track directly to the playlist (without preview)
 			addTrack: function(uri_playlist, user, track_name) {
 
-				console.log ("quieres añadir a la lista " + uri_playlist);
-				console.log ("el track " + track_name + " de " + user);
+				var currentPLaylist = this.playlists.playlistFromUri(uri_playlist);
+				var fpCallback = currentPLaylist.addTrack;
+
+				// ask for details of the track (to SoundCloud)
+				// if we get them, the track will be added
+				currentPLaylist.getDetailsTrack ( user, track_name, fpCallback );
+		
+				// show playlist updated
+				this.showPlaylist(uri_playlist);
 
 			}
 

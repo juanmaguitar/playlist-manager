@@ -12,9 +12,14 @@ div.pl_container  { margin:50px 0; }
 	div.pl_container .title, fieldset.edit_playlist { position:relative; padding:0px 20px; border:1px solid #ccc; }
 	div.pl_container .title { min-height:120px; margin-bottom:40px; }
 	div.pl_container .title h2 { color: #06C; font-size: 28px; margin: 20px 0 15px 110px; line-height: 32px; } 
-	div.pl_container .title p { margin-left: 112px; width: 80%; }
+	div.pl_container .title p { margin-left: 112px; width: 80%; margin-bottom:20px;}
+	
 	div.pl_container .actions { position:absolute; right:10px; bottom:0px; list-style-type: none; }
-	div.pl_container .actions li { margin-left:10px; display: inline; }
+		div.pl_container .actions li { margin-left:10px; display: inline; }
+	div.pl_container .bookmarklets { margin-left:111px; padding:0; list-style-type: none; width:70%;}
+		div.pl_container .bookmarklets li { margin-bottom:5px; }
+		
+
 	div.pl_container ol.tracks { margin-bottom:30px; font-size:16px;}
 	div.pl_container ol.tracks li { margin-bottom:12px; }
 	div.pl_container ol.tracks li a.track { background: url("../img/player-small-buttons.png") no-repeat -34px -5px;  height: 22px; padding:3px 0 0 31px; }

@@ -41,6 +41,10 @@
         <ul class="actions">
           <li><a class="edit" href="#">Edit</a></li>
           <li><a class="delete" href="#">Delete</a></li>
+        </ul>
+        <ul class="bookmarklets">
+          <li>Bookmarklet: <a href='javascript: (function(){ var aParts = document.location.href.split("/"), sUser = aParts[aParts.length-2], sIdTrack = aParts[aParts.length-1];  if (sUser && sIdTrack) document.location.href="<% print(sUrlBase) %>/#playlists/<%= uri %>/add/"+sUser+"/"+sIdTrack; else alert("please, use this bookmark from souncloud site"); })();'>Add track to <%= title %></a></li>
+          <li>Bookmarklet: <a href='javascript: (function(){ var aParts = document.location.href.split("/"), sUser = aParts[aParts.length-2], sIdTrack = aParts[aParts.length-1], sUrlPlaylist = "<% print(sUrlBase) %>/#playlists/<%= uri %>/add/"+sUser+"/"+sIdTrack; console.log (sUrlPlaylist); if (sUser && sIdTrack) { var i = document.createElement("iframe");i.style.display="none"; i.onload=function(){i.parentNode.removeChild(i); }; console.log (i); i.src = "<% print(sUrlBase) %>/#playlists/<%= uri %>/add/"+sUser+"/"+sIdTrack; document.body.appendChild(i); } else alert("please, use this bookmark from souncloud site"); })();'>Add track (silently) to <%= title %></a></li>
         </ul>  
       </div>
 
@@ -138,9 +142,19 @@
         </script>
 
         <ul>
-          <li>A user can edit and delete the playlists.</li>
-          <li>A user can play all the tracks in the playlist with one click or tap.</li>
-          <li>A user can give a playlist a title and description.</li>
+          <li>You can add, edit and delete the playlists.</li>
+          <li>You can give a playlist a title and description.</li>
+          <li>You can access directly to the playlists with friendly URL's.</li>
+          <li>You can play a single track or all the tracks in the playlist with one click or tap.</li>
+          <li>You can add tracks to the playlist and pre-listen them before doing this</li>
+          <li>You can add tracks to the playlist directly from SoundCloud site by using a bookmarklet available for every playlist:
+            <ul>
+                <li>The normal bookmarlet will redirect you to the playlist (showing you the new track added)</li>
+                <li>The silent bookmarklet will NOT redirect you to the playlist (but will add the track just the same)</li>
+            </ul>
+          </li>
+          
+          
         </ul>
 
         <div id="new_playlist"></div>
