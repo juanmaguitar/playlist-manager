@@ -280,12 +280,7 @@
 					description: sDesc,
 					uri: sUri
 				};
-/*
-				var oData = {
-					title: this.$("input[name='title']").val(),
-					description: this.$("textarea[name='description']").val()
-				};
-				*/
+
 				var bIsNew = this.model.isNew();
 				
 				if (!bIsNew) {
@@ -345,6 +340,9 @@
 			},
 
 			initialize: function() {
+				
+				this.collection.bind('add', this.render, this);
+				this.collection.bind('remove', this.render, this);
 				this.render();
 			},
 
@@ -364,7 +362,11 @@
 			
 			// We don need any data to render this view 
 			render: function() {
-				$(this.el).html( this.template() );
+
+				var nNumPLaylists = _.size(this.collection);
+				var oData = { num_playlists : nNumPLaylists };
+
+				$(this.el).html( this.template(oData) );
 				return this;	
 			}
 		
@@ -428,26 +430,44 @@
 			// The DOM events of this view
 			events: {
 				"click .details a" : "getDetailsSong",
-				"click .add a" : "addSong",
+				"click .add a.button" : "addSong",
+				"click .add .cancel" : "cancel",
 				"click a.see_form" : "show",
 			},
 
 			// Show the Form
 			show: function(eEvent) {
+
 				$(this.el).toggleClass("adding");
 				eEvent.preventDefault();
+
+			},
+
+			cancel: function(eEvent) {
+
+				this.render();
+				eEvent.preventDefault();
+				
 			},
 
 		    
 			// Show details of the track found through the API
 			// using view `SongDetailsView`
-			showTrackDetails : function ( oTrack ) {
+			showTrackDetails : function ( sIdSong, oTracks ) {
 
-				var viewSongDetails = new SongDetailsView({ data: oTrack });
-				
-				this.$('p.details').hide();
-				this.$('p.add').show().before( viewSongDetails.render().el );
-				this.songDetails = oTrack;
+				var viewSongDetails = null;
+				var oTrackFound = this.findTrackInResults( sIdSong, oTracks );
+
+				if (oTrackFound) {
+					viewSongDetails = new SongDetailsView({ data: oTrackFound });
+					
+					this.$('p.details').hide();
+					this.$('p.add').show().before( viewSongDetails.render().el );
+					this.songDetails = oTrackFound;
+				}
+				else {
+					/* console.log ("we found nothing"); */
+				}
 
 			},
 
@@ -455,20 +475,15 @@
 			findTrackInResults: function( sIdSong, oTracks ){
 
 				var oTrackFound = null;
-				_.bind( this.showTrackDetails, this ) 
 
 				$.each(oTracks, function(index, track) {
+
 					if ( track.permalink === sIdSong ) {
 						oTrackFound = track;
 					}
-				})
+				});
 
-				if (oTrackFound) {
-					this.showTrackDetails (oTrackFound);
-				}
-				else {
-					/* console.log ("we found nothing"); */
-				}
+				return oTrackFound;
 				
 			},
 
@@ -484,7 +499,7 @@
 				var sIdSong = aParts[aParts.length-1]
 
 				if (sUser && sIdSong ) {
-					SC.get("/users/"+sUser+"/tracks.json", _.bind( this.findTrackInResults, this, sIdSong ) );
+					SC.get("/users/"+sUser+"/tracks.json", _.bind( this.showTrackDetails, this, sIdSong ) );
 				}
 				else {
 					/* console.log ("we found nothing"); */
@@ -674,7 +689,8 @@
 			routes:{
 				"home": "showLibrary",
 				"": "showLibrary",
-				"playlists/:uri" : "showPlaylist"
+				"playlists/:uri" : "showPlaylist",
+				"playlists/:uri/add/:user/:track" : "addTrack"
 			},
 
 			initialize: function(options) {
@@ -715,12 +731,21 @@
 					this.showLibrary();
 				}
 
+			},
+
+			addTrack: function(uri_playlist, user, track_name) {
+
+				console.log ("quieres añadir a la lista " + uri_playlist);
+				console.log ("el track " + track_name + " de " + user);
+
 			}
 
         	
 		});
 
 	    window.oPlaylistsApp = new PlaylistsAppRouter();
+
+	    // See [this post](http://functionsource.com/post/backbone-history-startpushstate-true) 
 	    Backbone.history.start();
 		
 	});

@@ -72,6 +72,7 @@
 
     <script type="text/template" id="pl_new_tpl">
       <a href="#" id="create_playlist" class="big button">Create a New Playlist</a>
+      <a href="#home" id="view_all">View all (<%= num_playlists %>) playlists</a>
     </script>
 
     <!-- #playlist-new-song--> 
@@ -85,7 +86,11 @@
           <input name="url" size="60" /> 
           <p class="details"><a href="#" class="button">Get Details from SoundCloud</a></p>
           <div class="player_song"></div>
-          <p class="add hidden"><a href="#" class="button">Add this track</a></p>
+          <p class="add hidden">
+            <a href="#" class="button">Add this track</a>
+            <a href="#" class="cancel">Cancel</a>
+          </p>
+
         </div> 
 
     </script>
