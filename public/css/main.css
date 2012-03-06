@@ -2,7 +2,9 @@
 .hidden { display:none; }
 
 
-div#new_playlist { overflow:hidden; margin:20px 0; }
+div#new_playlist { position:relative; overflow:hidden; margin:20px 0; }
+	div#new_playlist #create_playlist { float:left; }
+	div#new_playlist #view_all { float:right; position:absolute; bottom:0; right:0; font-size:16px; }
 
 div.pl_container  { margin:50px 0; }
 	div.pl_container .title a.play_list { float: left; background-image: url("../img/player-large-buttons.png");background-position: -4px -4px; display: block; width: 85px; margin: 15px 25px 7px 0; text-indent: -999px; height: 90px; }
